@@ -6,10 +6,10 @@ import CreateProposal from "./dashboard/committee/CreateProposal";
 export default function Home() {
   return (
     <>
-    <Navbar/>
-    {/* <Login/> */}
+    {/* <Navbar/> */}
+    <Login/>
     {/* <CreateProposal/> */}
-      <StatusCard/>
+    {/* <StatusCard/> */}
     </>
   );
 }
