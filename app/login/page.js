@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { auth, db } from "@/src/firebase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
+import RoleSelector from "@/src/components/RoleSelector";
 
 const Login = () => {
   const [showAbout, setShowAbout] = useState(false);
@@ -39,30 +40,23 @@ const Login = () => {
         <img src="/logo.svg" width="150" alt="Logo" className="p-4" />
       </nav>
       <div className="flex flex-col -z-2 bg-[#e4f4ff] items-center justify-between p-10 h-[93vh] w-[100vw]">
-        <div className="flex flex-col md:flex-row w-[98vw] h-[50vh] p-5 justify-center gap-3">
-          <div className="clg">
-            <img src="/audi.jpeg" width="500" className="rounded-2xl" />
-          </div>
-          <div className="clg">
-            <img src="/audi.jpeg" width="500" className="rounded-2xl" />
-          </div>
-        </div>
         <button
           onClick={handleLogin}
-          className="mt-7 px-7 py-3 rounded-full text-white font-bold text-lg bg-[#2E7D32] active:translate-y-1 hover:-translate-y-0.5"
+          className="py-5 px-7 rounded-full text-white font-bold text-xl bg-[#2E7D32] active:translate-y-1 hover:-translate-y-0.5"
         >
           Log In
         </button>
+        <RoleSelector/>
         <img src="/vit.png" width="1100" className="mt-10 opacity-15" />
         <div className="relative w-[80vw] h-[20vh]">
           <button
-            className="absolute bottom-0 hover:font-bold active:font-bold z-10 text-[#C62828]"
+            className="absolute bottom-5 hover:font-bold active:font-bold z-10 text-[#C62828]"
             onClick={handleKnowMoreClick}
           >
             Know more...
           </button>
           {showAbout && (
-            <div className="absolute bottom-5 left-0 w-full bg-transparent p-5 h-[22vh] overflow-y-auto z-20">
+            <div className="absolute bottom-10 left-0 w-full bg-transparent p-5 h-[22vh] overflow-y-auto z-20">
               <p className="text-sm text-gray-800">
                 <b>Welcome to the official Events Page of Vidyalankar Institute of
                 Technology!</b>

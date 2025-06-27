@@ -1,7 +1,8 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from "react";
-import { db } from "@/src/firebase"; 
+import { db } from "@/src/firebase";
 import { collection, getDocs } from "firebase/firestore"; // Firestore imports
+import ProposalCard from "@/src/components/ProposalCard";
 
 const dummyProposal = {
   eventName: "Tech Fest",
@@ -19,7 +20,7 @@ const dummyProposal = {
 export default function CreateProposalForm() {
   const [showDetails, setShowDetails] = useState(false);
   const [comment, setComment] = useState("");
-  const [proposal, setProposal] = useState(dummyProposal); // use state for proposal (Firebase)
+  const [proposal, setProposal] = useState(dummyProposal); 
 
   const statusColors = {
     pending: "bg-yellow-400 text-yellow-900",
@@ -27,7 +28,6 @@ export default function CreateProposalForm() {
     declined: "bg-red-500 text-white",
   };
 
-  // Fetch proposal from Firestore (first document only)
   useEffect(() => {
     const fetchProposal = async () => {
       try {
@@ -47,38 +47,87 @@ export default function CreateProposalForm() {
   return (
     <div className="p-6 h-[93vh] bg-[#e4f4ff] text-[#212121]">
       {/* Event Card */}
-      <div onClick={() => setShowDetails(true)} className="relative p-5 bg-white rounded-xl shadow-md hover:shadow-xl cursor-pointer transition max-w-xl mx-auto">
-        <h3 className="text-xl font-bold text-[#1A1F71]">{proposal.eventName}</h3>
-        <p className="text-sm mt-1">Head: {proposal.committeeHead}</p>
-        <p className="text-sm text-[#616161]">Department: {proposal.department}</p>
-        <div className={`absolute bottom-3 right-4 px-3 py-1 rounded-full text-xs font-medium ${statusColors[proposal.status]}`}>
-          {proposal.status.toUpperCase()}
-        </div>
-      </div>
+      <ProposalCard proposal={proposal} onClick={() => setShowDetails(true)} />
 
       {/* Popup */}
       {showDetails && (
         <div className="fixed inset-0 bg-transparent shadow-2xl bg-opacity-20 flex justify-center items-center z-50">
           <div className="bg-white w-full max-w-2xl rounded-2xl p-6 shadow-xl relative overflow-y-auto max-h-[90vh]">
-            <button className="absolute top-2 right-3 text-xl" onClick={() => setShowDetails(false)}>×</button>
-            <p className="text-2xl font-bold mb-4 text-[#1A1F71]">{proposal.eventName}</p>
+            <button
+              className="absolute top-2 right-3 text-xl"
+              onClick={() => setShowDetails(false)}
+            >
+              ×
+            </button>
+            <p className="text-2xl font-bold mb-4 text-[#1A1F71]">
+              {proposal.eventName}
+            </p>
 
             <form className="space-y-3">
-              <input value={proposal.committeeHead} readOnly className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]" />
-              <input value={proposal.department} readOnly className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]" />
-              <input value={proposal.date} readOnly className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]" />
-              <input value={proposal.endDate} readOnly className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]" />
-              <input value={proposal.time} readOnly className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]" />
-              <input value={proposal.venue} readOnly className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]" />
-              <input value={proposal.budget} readOnly className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]" />
-              <textarea value={proposal.description} readOnly className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0] resize-y" rows={3} />
+              <input
+                value={proposal.committeeHead}
+                readOnly
+                className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]"
+              />
+              <input
+                value={proposal.department}
+                readOnly
+                className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]"
+              />
+              <input
+                value={proposal.date}
+                readOnly
+                className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]"
+              />
+              <input
+                value={proposal.endDate}
+                readOnly
+                className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]"
+              />
+              <input
+                value={proposal.time}
+                readOnly
+                className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]"
+              />
+              <input
+                value={proposal.venue}
+                readOnly
+                className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]"
+              />
+              <input
+                value={proposal.budget}
+                readOnly
+                className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]"
+              />
+              <textarea
+                value={proposal.description}
+                readOnly
+                className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0] resize-y"
+                rows={3}
+              />
 
-              <textarea placeholder="Add Comment (optional)" value={comment} onChange={(e) => setComment(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] resize-y" rows={3} />
+              <textarea
+                placeholder="Add Comment (optional)"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] resize-y"
+                rows={3}
+              />
 
               {proposal.status === "pending" && (
                 <div className="flex justify-end gap-4 mt-4">
-                  <button type="button" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Accept</button>
-                  <button type="button" className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">Decline</button>
+                  <button
+                    type="button"
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    type="button"
+                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+                  >
+                    Decline
+                  </button>
                 </div>
               )}
             </form>

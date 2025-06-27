@@ -71,7 +71,8 @@ const ImageSlider = () => {
             <ChevronRight />
           </button>
         </div>
-        <button className="mt-7 p-5 bg-[#2f3383] rounded-full text-white font-bold text-lg shadow-lg hover:scale-105 active:scale-95 transition-transform duration-300">
+        <button className="mt-7 p-5 bg-[#2f3383] rounded-full text-white font-bold text-lg shadow-lg hover:scale-105 active:scale-95 transition-transform duration-300"
+        onClick={() => window.location.href = "/login"}>
           Get Started
         </button>
         <div className="p-10">
