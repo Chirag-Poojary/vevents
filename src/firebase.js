@@ -5,21 +5,19 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
-// Firebase config (DON'T hardcode in production — use .env instead)
+// Use env variables instead of hardcoding
 const firebaseConfig = {
-  apiKey: "AIzaSyA-bLpPyM__Am-p_JVqVHC2aN3cCWrbQIA",
-  authDomain: "v-events-87376.firebaseapp.com",
-  projectId: "v-events-87376",
-  storageBucket: "v-events-87376.appspot.com", // fixed typo from `.app` to `.com`
-  messagingSenderId: "560467718748",
-  appId: "1:560467718748:web:57b881799f7a66fffe2c99",
-  measurementId: "G-BYEWTC5Q8P",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Optional: Initialize Analytics only if supported (avoids server-side errors in Next.js)
 let analytics;
 if (typeof window !== "undefined") {
   isSupported().then((yes) => {
@@ -27,7 +25,6 @@ if (typeof window !== "undefined") {
   });
 }
 
-// Initialize other services
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
