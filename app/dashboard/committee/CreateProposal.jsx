@@ -1,10 +1,64 @@
 "use client";
 import React, { useState } from "react";
+import { db } from "@/src/firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 export default function CreateProposalForm() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [isMultiDay, setIsMultiDay] = useState(false);
+
+  // Form data state
+  const [formData, setFormData] = useState({
+    eventName: "",
+    committeeHead: "",
+    time: "",
+    department: "",
+    venue: "",
+    budget: "",
+    description: "",
+    status: "pending",
+  });
+
+  // Handle text inputs
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle form submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const fullData = {
+        ...formData,
+        date: startDate,
+        endDate: isMultiDay ? endDate : startDate,
+      };
+
+      const docRef = await addDoc(collection(db, "proposals"), fullData);
+      console.log("✅ Proposal submitted with ID:", docRef.id);
+      alert("✅ Proposal submitted successfully!");
+
+      // Optional: Clear form
+      setFormData({
+        eventName: "",
+        committeeHead: "",
+        time: "",
+        department: "",
+        venue: "",
+        budget: "",
+        description: "",
+        status: "pending",
+      });
+      setStartDate("");
+      setEndDate("");
+      setIsMultiDay(false);
+    } catch (error) {
+      console.error("❌ Error submitting proposal:", error);
+      alert("❌ Failed to submit proposal. See console for details.");
+    }
+  };
 
   return (
     <div className="bg-[#e4f4ff] h-[93vh] w-[100vw] pt-10">
@@ -13,16 +67,24 @@ export default function CreateProposalForm() {
           Create New Event Proposal
         </h2>
 
-        <form className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
+            name="eventName"
+            value={formData.eventName}
+            onChange={handleChange}
             placeholder="Event Name"
             className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
+            required
           />
           <input
             type="text"
+            name="committeeHead"
+            value={formData.committeeHead}
+            onChange={handleChange}
             placeholder="Committee Head Name"
             className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
+            required
           />
 
           <div>
@@ -34,6 +96,7 @@ export default function CreateProposalForm() {
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
+              required
             />
           </div>
 
@@ -57,21 +120,32 @@ export default function CreateProposalForm() {
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
+                required
               />
             </div>
           )}
 
           <input
             type="text"
+            name="time"
+            value={formData.time}
+            onChange={handleChange}
             placeholder="Timing (e.g. 10:00 AM - 4:00 PM)"
             className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
+            required
           />
 
           <div>
             <label className="block text-sm font-medium text-[#1A1F71] mb-1">
               Department
             </label>
-            <select className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm">
+            <select
+              name="department"
+              value={formData.department}
+              onChange={handleChange}
+              className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
+              required
+            >
               <option value="">Select Department</option>
               <option value="INFT">INFT</option>
               <option value="CMPN">CMPN</option>
@@ -84,15 +158,25 @@ export default function CreateProposalForm() {
 
           <input
             type="text"
+            name="venue"
+            value={formData.venue}
+            onChange={handleChange}
             placeholder="Venue"
             className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
+            required
           />
           <input
             type="number"
+            name="budget"
+            value={formData.budget}
+            onChange={handleChange}
             placeholder="Budget (optional)"
             className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
           />
           <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
             placeholder="More Description (optional)"
             rows="4"
             className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm resize-y"

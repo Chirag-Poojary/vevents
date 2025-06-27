@@ -7,11 +7,12 @@ import ImageSlider from "@/src/components/First";
 export default function Home() {
   return (
     <>
-    {/* <Navbar/> */}
-    <ImageSlider/>
-    {/* <Login/> */}
-    {/* <CreateProposal/> */}
-    {/* <StatusCard/> */}
+      {/* <Navbar/> */}
+      <ImageSlider />
+      {/* <Login/> */}
+      <CreateProposal />
+      {/* <StatusCard/> */}
     </>
   );
 }
+
