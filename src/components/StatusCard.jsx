@@ -17,7 +17,7 @@ const dummyProposal = {
   status: "pending", // accepted / declined
 };
 
-export default function CreateProposalForm() {
+export default function StatusCard() {
   const [showDetails, setShowDetails] = useState(false);
   const [comment, setComment] = useState("");
   const [proposal, setProposal] = useState(dummyProposal); 
@@ -52,7 +52,7 @@ export default function CreateProposalForm() {
       {/* Popup */}
       {showDetails && (
         <div className="fixed inset-0 bg-transparent shadow-2xl bg-opacity-20 flex justify-center items-center z-50">
-          <div className="bg-white w-full max-w-2xl rounded-2xl p-6 shadow-xl relative overflow-y-auto max-h-[90vh]">
+          <div className="bg-[#c8e9ff] w-full max-w-2xl rounded-2xl p-6 shadow-xl relative overflow-y-auto max-h-[90vh]">
             <button
               className="absolute top-2 right-3 text-xl"
               onClick={() => setShowDetails(false)}

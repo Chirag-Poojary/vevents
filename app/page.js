@@ -1,7 +1,7 @@
 import Navbar from "@/src/components/Navbar";
 import StatusCard from "@/src/components/StatusCard";
 import Login from "./login/page";
-import CreateProposal from "./dashboard/committee/CreateProposal";
+import CreateProposal from "../src/components/CreateProposal";
 import ImageSlider from "@/src/components/First";
 
 export default function Home() {

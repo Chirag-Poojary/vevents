@@ -5,7 +5,10 @@ import { db } from "@/src/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import ProposalCard from "@/src/components/ProposalCard";
 
+import CreateProposal from "@/src/components/CreateProposal";
+
 const PendingProposals = () => {
+  const [showForm, setShowForm] = useState(false);
   const [proposals, setProposals] = useState([]);
   const [showDetails, setShowDetails] = useState(false);
   const [selectedProposal, setSelectedProposal] = useState(null);
@@ -25,6 +28,26 @@ const PendingProposals = () => {
     <>
       <Navbar />
       <div className="p-6 bg-[#e4f4ff] min-h-screen text-[#212121]">
+        <button
+          className="bg-[#2E7D32] text-white font-bold text-lg px-5 py-3 rounded-full mb-5"
+          onClick={() => setShowForm(!showForm)}
+        >
+          Create Proposal
+        </button>
+        {showForm && (
+          <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-center items-center">
+            <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto relative shadow-lg">
+              <button
+                className="absolute top-2 right-3 text-2xl font-bold text-gray-600 hover:text-red-600"
+                onClick={() => setShowForm(false)}
+              >
+                ×
+              </button>
+              <CreateProposal />
+            </div>
+          </div>
+        )}
+
         <h2 className="text-2xl font-bold mb-6 text-[#1A1F71]">
           Pending Proposals
         </h2>
@@ -44,7 +67,7 @@ const PendingProposals = () => {
 
         {showDetails && selectedProposal && (
           <div className="fixed inset-0 bg-transparent bg-opacity-30 z-50 flex justify-center items-center">
-            <div className="bg-white w-full max-w-2xl rounded-2xl p-6 shadow-xl relative max-h-[90vh] overflow-y-auto">
+            <div className="bg-[#bce4ff] w-full max-w-2xl rounded-2xl p-6 shadow-xl relative max-h-[90vh] overflow-y-auto">
               <button
                 className="absolute top-2 right-3 text-xl"
                 onClick={() => setShowDetails(false)}
