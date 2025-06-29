@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { db } from "@/src/firebase";
 import { collection, addDoc } from "firebase/firestore";
-
+  import { ToastContainer, toast } from 'react-toastify';
 export default function CreateProposal() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -38,7 +38,13 @@ export default function CreateProposal() {
 
       const docRef = await addDoc(collection(db, "proposals"), fullData);
       console.log("✅ Proposal submitted with ID:", docRef.id);
-      alert("✅ Proposal submitted successfully!");
+      toast.success("Proposal submitted", {
+        position: "bottom-right",
+        autoClose: 3000,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
 
       // Optional: Clear form
       setFormData({
@@ -50,144 +56,162 @@ export default function CreateProposal() {
         budget: "",
         description: "",
         status: "pending",
+        approvalStage: "hod",
       });
       setStartDate("");
       setEndDate("");
       setIsMultiDay(false);
     } catch (error) {
       console.error("❌ Error submitting proposal:", error);
-      alert("❌ Failed to submit proposal. See console for details.");
+      toast.error("Error submitting proposal", {
+        position: "bottom-right",
+        autoClose: 3000,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
     }
   };
 
   return (
-      <div className="max-w-2xl  p-6 bg-[#FAFAFA] rounded-2xl shadow-2xl text-[#000000]">
-        <h2 className="text-3xl font-bold text-center mb-6 text-[#1A1F71]">
-          Create New Event Proposal
-        </h2>
+    <div className="max-w-2xl  p-6 bg-[#FAFAFA] rounded-2xl shadow-2xl text-[#000000]">
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <h2 className="text-3xl font-bold text-center mb-6 text-[#1A1F71]">
+        Create New Event Proposal
+      </h2>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="text"
+          name="eventName"
+          value={formData.eventName}
+          onChange={handleChange}
+          placeholder="Event Name"
+          className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
+          required
+        />
+        <input
+          type="text"
+          name="committeeHead"
+          value={formData.committeeHead}
+          onChange={handleChange}
+          placeholder="Committee Head Name"
+          className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
+          required
+        />
+
+        <div>
+          <label className="block text-sm font-medium text-[#1A1F71] mb-1">
+            Date of Event
+          </label>
           <input
-            type="text"
-            name="eventName"
-            value={formData.eventName}
-            onChange={handleChange}
-            placeholder="Event Name"
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
             className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
             required
           />
-          <input
-            type="text"
-            name="committeeHead"
-            value={formData.committeeHead}
-            onChange={handleChange}
-            placeholder="Committee Head Name"
-            className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
-            required
-          />
+        </div>
 
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={isMultiDay}
+            onChange={(e) => setIsMultiDay(e.target.checked)}
+            className="accent-[#2E7D32]"
+          />
+          Event lasts more than 1 day
+        </label>
+
+        {isMultiDay && (
           <div>
             <label className="block text-sm font-medium text-[#1A1F71] mb-1">
-              Date of Event
+              End Date
             </label>
             <input
               type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
               className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
               required
             />
           </div>
+        )}
 
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={isMultiDay}
-              onChange={(e) => setIsMultiDay(e.target.checked)}
-              className="accent-[#2E7D32]"
-            />
-            Event lasts more than 1 day
+        <input
+          type="text"
+          name="time"
+          value={formData.time}
+          onChange={handleChange}
+          placeholder="Timing (e.g. 10:00 AM - 4:00 PM)"
+          className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
+          required
+        />
+
+        <div>
+          <label className="block text-sm font-medium text-[#1A1F71] mb-1">
+            Department
           </label>
-
-          {isMultiDay && (
-            <div>
-              <label className="block text-sm font-medium text-[#1A1F71] mb-1">
-                End Date
-              </label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
-                required
-              />
-            </div>
-          )}
-
-          <input
-            type="text"
-            name="time"
-            value={formData.time}
+          <select
+            name="department"
+            value={formData.department}
             onChange={handleChange}
-            placeholder="Timing (e.g. 10:00 AM - 4:00 PM)"
             className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
             required
-          />
-
-          <div>
-            <label className="block text-sm font-medium text-[#1A1F71] mb-1">
-              Department
-            </label>
-            <select
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
-              required
-            >
-              <option value="">Select Department</option>
-              <option value="INFT">INFT</option>
-              <option value="CMPN">CMPN</option>
-              <option value="EXTC">EXTC</option>
-              <option value="ENTC">ENTC</option>
-              <option value="BIOMED">BIOMED</option>
-              <option value="COUNCIL">Council</option>
-            </select>
-          </div>
-
-          <input
-            type="text"
-            name="venue"
-            value={formData.venue}
-            onChange={handleChange}
-            placeholder="Venue"
-            className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
-            required
-          />
-          <input
-            type="number"
-            name="budget"
-            value={formData.budget}
-            onChange={handleChange}
-            placeholder="Budget (optional)"
-            className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
-          />
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            placeholder="More Description (optional)"
-            rows="4"
-            className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm resize-y"
-          />
-
-          <button
-            type="submit"
-            className="w-full py-3 bg-[#1A1F71] text-white font-semibold rounded-lg hover:bg-[#2E7D32] transition duration-300"
           >
-            Submit Proposal
-          </button>
-        </form>
-      </div>
+            <option value="">Select Department</option>
+            <option value="INFT">INFT</option>
+            <option value="CMPN">CMPN</option>
+            <option value="EXTC">EXTC</option>
+            <option value="ENTC">ENTC</option>
+            <option value="BIOMED">BIOMED</option>
+            <option value="COUNCIL">Council</option>
+          </select>
+        </div>
+
+        <input
+          type="text"
+          name="venue"
+          value={formData.venue}
+          onChange={handleChange}
+          placeholder="Venue"
+          className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
+          required
+        />
+        <input
+          type="number"
+          name="budget"
+          value={formData.budget}
+          onChange={handleChange}
+          placeholder="Budget (optional)"
+          className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
+        />
+        <textarea
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          placeholder="More Description (optional)"
+          rows="4"
+          className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm resize-y"
+        />
+
+        <button
+          type="submit"
+          className="w-full py-3 bg-[#1A1F71] text-white font-semibold rounded-lg hover:bg-[#2E7D32] transition duration-300"
+        >
+          Submit Proposal
+        </button>
+      </form>
+    </div>
   );
 }

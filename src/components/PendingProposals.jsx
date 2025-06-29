@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { db } from "@/src/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import ProposalCard from "@/src/components/ProposalCard";
-
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import CreateProposal from "@/src/components/CreateProposal";
 
 const PendingProposals = () => {
@@ -12,40 +12,85 @@ const PendingProposals = () => {
   const [proposals, setProposals] = useState([]);
   const [showDetails, setShowDetails] = useState(false);
   const [selectedProposal, setSelectedProposal] = useState(null);
+  const [userRole, setUserRole] = useState("");
 
+  const fetchData = async (userRole) => {
+    const querySnapshot = await getDocs(collection(db, "proposals"));
+
+    let filtered = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    if (userRole === "committee") {
+      filtered = filtered.filter((p) => p.status === "pending");
+    } else if (userRole === "hod") {
+      filtered = filtered.filter((p) => p.approvalStage === "hod");
+    } else if (userRole === "principal") {
+      filtered = filtered.filter((p) => p.approvalStage === "principal");
+    } else if (userRole === "accounts") {
+      filtered = filtered.filter(
+        (p) => p.approvalStage === "accounts" && p.budget > 0
+      );
+    }
+
+    setProposals(filtered);
+  };
+
+  const fetchUserRole = async (email) => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "users"));
+      const matchedDoc = querySnapshot.docs.find(
+        (doc) => doc.data().email === email
+      );
+      if (matchedDoc) {
+        const role = matchedDoc.data().role;
+        setUserRole(role);
+        fetchData(role);
+      }
+    } catch (err) {
+      console.error("Error fetching user role:", err);
+    }
+  };
   useEffect(() => {
-    const fetchData = async () => {
-      const querySnapshot = await getDocs(collection(db, "proposals"));
-      const data = querySnapshot.docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }))
-        .filter((proposal) => proposal.status === "pending");
-      setProposals(data);
-    };
-    fetchData();
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchUserRole(user.email);
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   return (
     <>
-      <Navbar />
+      <Navbar/>
       <div className="p-6 bg-[#e4f4ff] min-h-screen text-[#212121]">
-        <button
-          className="bg-[#2E7D32] text-white font-bold text-lg px-5 py-3 rounded-full mb-5"
-          onClick={() => setShowForm(!showForm)}
-        >
-          Create Proposal
-        </button>
-        {showForm && (
-          <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-center items-center">
-            <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto relative shadow-lg">
-              <button
-                className="absolute top-2 right-3 text-2xl font-bold text-gray-600 hover:text-red-600"
-                onClick={() => setShowForm(false)}
-              >
-                ×
-              </button>
-              <CreateProposal />
-            </div>
-          </div>
+        {/* Only show to committee users */}
+        {userRole === "committee" && (
+          <>
+            <button
+              className="bg-[#2E7D32] text-white font-bold text-lg px-5 py-3 rounded-full mb-5"
+              onClick={() => setShowForm(true)}
+            >
+              Create Proposal
+            </button>
+
+            {showForm && (
+              <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-center items-center">
+                <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto relative shadow-lg">
+                  <button
+                    className="absolute top-2 right-3 text-2xl font-bold text-gray-600 hover:text-red-600"
+                    onClick={() => setShowForm(false)}
+                  >
+                    ×
+                  </button>
+                  <CreateProposal />
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         <h2 className="text-2xl font-bold mb-6 text-[#1A1F71]">

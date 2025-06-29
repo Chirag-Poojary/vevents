@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { db } from "@/src/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import Navbar from "@/src/components/Navbar";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const statusColors = {
   accepted: "bg-green-500 text-white",
@@ -11,17 +12,58 @@ const statusColors = {
 
 const ProposalStatus = () => {
   const [proposals, setProposals] = useState([]);
+    const [userRole, setUserRole] = useState("");
+
+  // ✅ ROLE-FETCHING LOGIC GOES HERE
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const querySnapshot = await getDocs(collection(db, "users"));
+        const matchedDoc = querySnapshot.docs.find(
+          (doc) => doc.data().email === user.email
+        );
+        if (matchedDoc) {
+          setUserRole(matchedDoc.data().role);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const fetchData = async (role) => {
+    const querySnapshot = await getDocs(collection(db, "proposals"));
+    const allData = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    let filtered = [];
+
+    if (role === "committee") {
+      filtered = allData.filter((p) => p.status !== "pending"); // committee sees final result
+    } else if (role === "hod") {
+      filtered = allData.filter(
+        (p) => p.approvalStage !== "hod" && p.status === "pending"
+      );
+    } else if (role === "principal") {
+      filtered = allData.filter(
+        (p) => p.approvalStage !== "principal" && p.status === "pending"
+      );
+    } else if (role === "accounts") {
+      filtered = allData.filter(
+        (p) => p.status !== "pending" && p.approvalStage === "done"
+      );
+    }
+
+    setProposals(filtered);
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const querySnapshot = await getDocs(collection(db, "proposals"));
-      const data = querySnapshot.docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }))
-        .filter((proposal) => proposal.status !== "pending"); 
-      setProposals(data);
-    };
-    fetchData();
-  }, []);
+    if (userRole) fetchData(userRole);
+  }, [userRole]);
+
   return (
     <>
       <Navbar />

@@ -1,58 +1,98 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { db } from "@/src/firebase";
-import { collection, getDocs } from "firebase/firestore"; // Firestore imports
+import { collection, getDocs } from "firebase/firestore";
 import ProposalCard from "@/src/components/ProposalCard";
-
-const dummyProposal = {
-  eventName: "Tech Fest",
-  committeeHead: "John Doe",
-  department: "CMPN",
-  date: "2025-07-10",
-  endDate: "2025-07-12",
-  time: "10:00 AM - 5:00 PM",
-  venue: "Auditorium",
-  budget: 5000,
-  description: "Annual technology event with multiple workshops and speakers.",
-  status: "pending", // accepted / declined
-};
+import ApprovalActions from "@/src/components/ApprovalActions";
+import { ToastContainer } from "react-toastify";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default function StatusCard() {
-  const [showDetails, setShowDetails] = useState(false);
+  const [userRole, setUserRole] = useState("");
+  const [proposals, setProposals] = useState([]);
+  const [selectedProposal, setSelectedProposal] = useState(null);
   const [comment, setComment] = useState("");
-  const [proposal, setProposal] = useState(dummyProposal); 
+  const [showDetails, setShowDetails] = useState(false);
 
-  const statusColors = {
-    pending: "bg-yellow-400 text-yellow-900",
-    accepted: "bg-green-500 text-white",
-    declined: "bg-red-500 text-white",
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const querySnapshot = await getDocs(collection(db, "users"));
+        const matchedDoc = querySnapshot.docs.find(
+          (doc) => doc.data().email === user.email
+        );
+        if (matchedDoc) {
+          setUserRole(matchedDoc.data().role);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const fetchProposals = async (role) => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "proposals"));
+      const allData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      let filtered = [];
+
+      if (role === "committee" || role === "hod") {
+        filtered = allData.filter(
+          (p) => p.status === "pending" && p.approvalStage === "hod"
+        );
+      } else if (role === "principal") {
+        filtered = allData.filter(
+          (p) => p.approvalStage === "principal" && p.status === "pending"
+        );
+      } else if (role === "accounts") {
+        filtered = allData.filter(
+          (p) => p.approvalStage === "accounts" && p.budget > 0
+        );
+      }
+
+      setProposals(filtered);
+    } catch (error) {
+      console.error("Error fetching proposals:", error);
+    }
   };
 
   useEffect(() => {
-    const fetchProposal = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "proposals"));
-        if (!querySnapshot.empty) {
-          const data = querySnapshot.docs[0].data();
-          setProposal(data);
-        }
-      } catch (error) {
-        console.error("Error fetching proposal:", error);
-      }
-    };
-
-    fetchProposal();
-  }, []);
+    if (userRole) fetchProposals(userRole);
+  }, [userRole]);
 
   return (
     <div className="p-6 h-[93vh] bg-[#e4f4ff] text-[#212121]">
-      {/* Event Card */}
-      <ProposalCard proposal={proposal} onClick={() => setShowDetails(true)} />
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        theme="colored"
+      />
+      <h2 className="text-2xl font-bold mb-6 text-[#1A1F71]">
+        Pending Proposals
+      </h2>
+      {/* List all proposals */}
+      <div className="grid gap-4">
+        {proposals.map((proposal) => (
+          <ProposalCard
+            key={proposal.id}
+            proposal={proposal}
+            onClick={() => {
+              setSelectedProposal(proposal);
+              setShowDetails(true);
+            }}
+          />
+        ))}
+      </div>
 
-      {/* Popup */}
-      {showDetails && (
-        <div className="fixed inset-0 bg-transparent shadow-2xl bg-opacity-20 flex justify-center items-center z-50">
-          <div className="bg-[#c8e9ff] w-full max-w-2xl rounded-2xl p-6 shadow-xl relative overflow-y-auto max-h-[90vh]">
+      {/* Modal for selected proposal */}
+      {showDetails && selectedProposal && (
+        <div className="fixed inset-0 bg-black bg-opacity-20 z-50 flex justify-center items-center">
+          <div className="bg-[#c8e9ff] w-full max-w-2xl rounded-2xl p-6 shadow-xl relative max-h-[90vh] overflow-y-auto">
             <button
               className="absolute top-2 right-3 text-xl"
               onClick={() => setShowDetails(false)}
@@ -60,49 +100,49 @@ export default function StatusCard() {
               ×
             </button>
             <p className="text-2xl font-bold mb-4 text-[#1A1F71]">
-              {proposal.eventName}
+              {selectedProposal.eventName}
             </p>
 
             <form className="space-y-3">
               <input
-                value={proposal.committeeHead}
+                value={selectedProposal.committeeHead}
                 readOnly
-                className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]"
+                className="w-full px-4 py-2 bg-gray-100 rounded-lg border"
               />
               <input
-                value={proposal.department}
+                value={selectedProposal.department}
                 readOnly
-                className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]"
+                className="w-full px-4 py-2 bg-gray-100 rounded-lg border"
               />
               <input
-                value={proposal.date}
+                value={selectedProposal.date}
                 readOnly
-                className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]"
+                className="w-full px-4 py-2 bg-gray-100 rounded-lg border"
               />
               <input
-                value={proposal.endDate}
+                value={selectedProposal.endDate}
                 readOnly
-                className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]"
+                className="w-full px-4 py-2 bg-gray-100 rounded-lg border"
               />
               <input
-                value={proposal.time}
+                value={selectedProposal.time}
                 readOnly
-                className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]"
+                className="w-full px-4 py-2 bg-gray-100 rounded-lg border"
               />
               <input
-                value={proposal.venue}
+                value={selectedProposal.venue}
                 readOnly
-                className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]"
+                className="w-full px-4 py-2 bg-gray-100 rounded-lg border"
               />
               <input
-                value={proposal.budget}
+                value={selectedProposal.budget}
                 readOnly
-                className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0]"
+                className="w-full px-4 py-2 bg-gray-100 rounded-lg border"
               />
               <textarea
-                value={proposal.description}
+                value={selectedProposal.description}
                 readOnly
-                className="w-full px-4 py-2 bg-gray-100 rounded-lg border border-[#E0E0E0] resize-y"
+                className="w-full px-4 py-2 bg-gray-100 rounded-lg border resize-y"
                 rows={3}
               />
 
@@ -110,25 +150,17 @@ export default function StatusCard() {
                 placeholder="Add Comment (optional)"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] resize-y"
+                className="w-full px-4 py-2 rounded-lg border resize-y"
                 rows={3}
               />
 
-              {proposal.status === "pending" && (
-                <div className="flex justify-end gap-4 mt-4">
-                  <button
-                    type="button"
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
-                  >
-                    Accept
-                  </button>
-                  <button
-                    type="button"
-                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
-                  >
-                    Decline
-                  </button>
-                </div>
+              {selectedProposal.approvalStage !== "done" && (
+                <ApprovalActions
+                  proposal={selectedProposal}
+                  comment={comment}
+                  setShowDetails={setShowDetails}
+                  fetchProposal={fetchProposals}
+                />
               )}
             </form>
           </div>
