@@ -10,7 +10,7 @@ export default function Home() {
       {/* <Navbar/> */}
       <ImageSlider />
       {/* <Login/> */}
-      <CreateProposal />
+      {/* <CreateProposal /> */}
       {/* <StatusCard/> */}
     </>
   );

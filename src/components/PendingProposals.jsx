@@ -38,25 +38,32 @@ const PendingProposals = () => {
   };
 
   const fetchUserRole = async (email) => {
+    const res = await fetch("/api/getUserRole", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    const text = await res.text(); // Read raw response
+    console.log("🧾 Raw API response:", text);
+
     try {
-      const querySnapshot = await getDocs(collection(db, "users"));
-      const matchedDoc = querySnapshot.docs.find(
-        (doc) => doc.data().email === email
-      );
-      if (matchedDoc) {
-        const role = matchedDoc.data().role;
-        setUserRole(role);
-        fetchData(role);
-      }
+      const data = JSON.parse(text); // Try to parse manually
+      console.log("✅ Parsed data:", data);
     } catch (err) {
-      console.error("Error fetching user role:", err);
+      console.error("❌ Failed to parse JSON:", err);
     }
   };
+
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         fetchUserRole(user.email);
+      } else {
+        console.warn("User not logged in");
       }
     });
 
@@ -65,7 +72,7 @@ const PendingProposals = () => {
 
   return (
     <>
-      <Navbar/>
+      <Navbar />
       <div className="p-6 bg-[#e4f4ff] min-h-screen text-[#212121]">
         {/* Only show to committee users */}
         {userRole === "committee" && (

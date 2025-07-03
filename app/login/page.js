@@ -4,7 +4,7 @@ import { auth, db } from "@/src/firebase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import RoleSelector from "@/src/components/RoleSelector";
-  import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast } from "react-toastify";
 const Login = () => {
   const [showAbout, setShowAbout] = useState(false);
 
@@ -18,14 +18,7 @@ const Login = () => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // Save user to Firestore (under users collection)
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        name: user.displayName,
-        email: user.email,
-        photoURL: user.photoURL,
-        timestamp: new Date().toISOString(),
-      });
+      // Use the user data to check in MongoDB instead (skip Firestore)
 
       toast.success("Login Successful", {
         position: "bottom-right",
@@ -35,8 +28,8 @@ const Login = () => {
         theme: "colored",
       });
     } catch (error) {
-      console.error("Login Error:", error);
-      toast.error("Login Error", {
+      console.error("Login Error:", error.code, error.message);
+      toast.error(`Login Failed: ${error.message}`, {
         position: "bottom-right",
         autoClose: 3000,
         pauseOnHover: true,

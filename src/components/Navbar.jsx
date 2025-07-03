@@ -13,7 +13,7 @@ const Navbar = () => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          const res = await fetch("/api/verify-role", {
+          const res = await fetch("/api/get-role", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

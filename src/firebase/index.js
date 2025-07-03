@@ -1,4 +1,4 @@
-// lib/firebase.js
+
 import { initializeApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
@@ -28,5 +28,7 @@ if (typeof window !== "undefined") {
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
+console.log("auth:", auth);
+console.log("db:", db);
 
 export { app, db, auth, storage };
