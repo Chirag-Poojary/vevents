@@ -20,16 +20,24 @@ const ProposalStatus = () => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const querySnapshot = await getDocs(collection(db, "users"));
-        const matchedDoc = querySnapshot.docs.find(
-          (doc) => doc.data().email === user.email
-        );
-        if (matchedDoc) {
-          setUserRole(matchedDoc.data().role?.toLowerCase());
+        try {
+          const res = await fetch("/api/getUserRole", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: user.email }),
+          });
+          const data = await res.json();
+          if (res.ok && data.role) {
+            setUserRole(data.role.toLowerCase());
+            console.log("✅ Role set to:", data.role.toLowerCase());
+          } else {
+            console.warn("❌ No role from API", data);
+          }
+        } catch (err) {
+          console.error("🔥 Role fetch error:", err);
         }
       }
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -49,24 +57,19 @@ const ProposalStatus = () => {
     } else if (role === "hod") {
       filtered = allData.filter(
         (p) =>
-          // HOD approved → forwarded to principal or beyond
-          (["principal", "accounts", "done"].includes(p.approvalStage) &&
-            p.status === "pending") ||
-          // HOD declined
+          (p.approvalStage === "principal" && p.status === "pending") ||
           (p.approvalStage === "done" && p.status === "declined")
       );
     } else if (role === "principal") {
       filtered = allData.filter(
         (p) =>
-          // Principal reviewed (approved or declined)
-          (["accounts", "done"].includes(p.approvalStage) &&
-            (p.status === "pending" || p.status === "accepted")) ||
-          (p.approvalStage === "done" && p.status === "declined")
+          (p.approvalStage === "accounts" && p.status === "pending") ||
+          (p.approvalStage === "done" &&
+            (p.status === "accepted" || p.status === "declined"))
       );
     } else if (role === "accounts") {
       filtered = allData.filter(
         (p) =>
-          // Accounts reviewed (final accepted or declined)
           p.approvalStage === "done" &&
           (p.status === "accepted" || p.status === "declined")
       );
@@ -115,12 +118,6 @@ const ProposalStatus = () => {
                 </p>
                 <p className="text-sm text-[#616161]">
                   Department: {proposal.department || "N/A"}
-                </p>
-                <p className="text-sm text-[#616161]">
-                  Date: {proposal.date || "N/A"}
-                </p>
-                <p className="text-sm text-[#616161] mb-2">
-                  Venue: {proposal.venue || "N/A"}
                 </p>
                 {proposal.comment && (
                   <p className="text-xs italic text-gray-600">
