@@ -3,19 +3,48 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/src/firebase";
 import { toast } from "react-toastify";
 
-const ApprovalActions = ({ proposal, comment, setShowDetails, fetchProposal }) => {
+const ApprovalActions = ({
+  proposal,
+  comment,
+  setShowDetails,
+  fetchProposal,
+}) => {
   const handleApprove = async () => {
     let nextStage = "";
+    let updatePayload = {};
 
-    // Determine next approval stage
-    if (proposal.approvalStage === "hod") nextStage = "principal";
-    else if (proposal.approvalStage === "principal") nextStage = "accounts";
-    else if (proposal.approvalStage === "accounts") nextStage = "done";
+    const currentStage = proposal.approvalStage;
+    const budget = parseFloat(proposal.budget || "0");
 
-    const updatePayload =
-      nextStage === "done"
-        ? { approvalStage: "done", status: "accepted", comment }
-        : { approvalStage: nextStage, comment };
+    if (currentStage === "hod") {
+      nextStage = "principal";
+      updatePayload = {
+        approvalStage: nextStage,
+        status: "pending",
+        remarks: comment, // ✅ use 'remarks' instead of 'comment'
+      };
+    } else if (currentStage === "principal") {
+      if (budget > 0) {
+        nextStage = "accounts";
+        updatePayload = {
+          approvalStage: nextStage,
+          status: "pending",
+          remarks: comment,
+        };
+      } else {
+        updatePayload = {
+          approvalStage: "done",
+          status: "accepted",
+          remarks: comment,
+        };
+      }
+    } else if (currentStage === "accounts") {
+      updatePayload = {
+        approvalStage: "done",
+        status: "accepted",
+        remarks: comment,
+      };
+    }
 
     try {
       await updateDoc(doc(db, "proposals", proposal.id), updatePayload);
@@ -24,6 +53,7 @@ const ApprovalActions = ({ proposal, comment, setShowDetails, fetchProposal }) =
       fetchProposal();
     } catch (err) {
       console.error("Error approving:", err);
+      toast.error("Failed to update proposal", { theme: "colored" });
     }
   };
 
@@ -32,13 +62,14 @@ const ApprovalActions = ({ proposal, comment, setShowDetails, fetchProposal }) =
       await updateDoc(doc(db, "proposals", proposal.id), {
         status: "declined",
         approvalStage: "done",
-        comment,
+        remarks: comment,
       });
       toast.success("Proposal Declined!", { theme: "colored" });
       setShowDetails(false);
       fetchProposal();
     } catch (err) {
       console.error("Error declining:", err);
+      toast.error("Failed to decline proposal", { theme: "colored" });
     }
   };
 

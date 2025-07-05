@@ -18,13 +18,28 @@ export default function StatusCard() {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const querySnapshot = await getDocs(collection(db, "users"));
-        const matchedDoc = querySnapshot.docs.find(
-          (doc) => doc.data().email === user.email
-        );
-        if (matchedDoc) {
-          setUserRole(matchedDoc.data().role);
+        try {
+          const res = await fetch("/api/getUserRole", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email: user.email }),
+          });
+
+          const data = await res.json();
+
+          if (res.ok && data.role) {
+            setUserRole(data.role.toLowerCase());
+            console.log("✅ Role from Mongo:", data.role);
+          } else {
+            console.warn("⚠️ Role not found in MongoDB");
+          }
+        } catch (err) {
+          console.error("❌ Error fetching role from MongoDB:", err);
         }
+      } else {
+        console.warn("⛔ No Firebase user detected");
       }
     });
 
@@ -41,7 +56,7 @@ export default function StatusCard() {
 
       let filtered = [];
 
-      if (role === "committee" || role === "hod") {
+      if (role === "hod") {
         filtered = allData.filter(
           (p) => p.status === "pending" && p.approvalStage === "hod"
         );

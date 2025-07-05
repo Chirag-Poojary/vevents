@@ -50,8 +50,13 @@ const PendingProposals = () => {
     console.log("🧾 Raw API response:", text);
 
     try {
-      const data = JSON.parse(text); // Try to parse manually
+      const data = JSON.parse(text);
       console.log("✅ Parsed data:", data);
+      if (data?.role) {
+        const role = data.role.toLowerCase();
+        setUserRole(role);
+        fetchData(role);
+      }
     } catch (err) {
       console.error("❌ Failed to parse JSON:", err);
     }
@@ -103,6 +108,14 @@ const PendingProposals = () => {
         <h2 className="text-2xl font-bold mb-6 text-[#1A1F71]">
           Pending Proposals
         </h2>
+        {!proposals.length ? (
+          <div className="flex w-full h-[60vh] justify-center items-center flex-col">
+            <img src="/background.svg" className="w-[25vw] mt-20 opacity-60"></img>
+            <p className="text-center text-gray-400 text-2xl mt-5 ">
+              No proposals to show
+            </p>
+          </div>
+        ) : (
 
         <div className="grid gap-4">
           {proposals.map((proposal) => (
@@ -116,6 +129,7 @@ const PendingProposals = () => {
             />
           ))}
         </div>
+        )}
 
         {showDetails && selectedProposal && (
           <div className="fixed inset-0 bg-transparent bg-opacity-30 z-50 flex justify-center items-center">

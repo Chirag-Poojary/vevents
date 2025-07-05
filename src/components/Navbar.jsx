@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -12,31 +13,36 @@ const Navbar = () => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        console.log("✅ Authenticated user:", user.email);
+
         try {
-          const res = await fetch("/api/get-role", {
+          const res = await fetch("/api/getUserRole", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: user.email }),
           });
 
           const data = await res.json();
-          if (data.success && data.role) {
-            setRole(data.role.toLowerCase());
+          console.log("🎯 Role API response:", data);
+
+          if (data?.role) {
+            const normalizedRole = data.role.toLowerCase();
+            setRole(normalizedRole);
+            console.log("✅ Role set to:", normalizedRole);
           } else {
-            console.warn("No role found for user");
+            console.warn("⚠️ No role found in response:", data);
           }
         } catch (err) {
-          console.error("Error fetching user role:", err);
+          console.error("❌ Error fetching user role:", err);
         }
       } else {
-        router.push("/login");
+        console.warn("🔒 User not logged in");
+        if (pathname !== "/login") router.push("/login");
       }
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, [router, pathname]);
 
   const navItems = [
     {
@@ -74,9 +80,9 @@ const Navbar = () => {
           {navItems.map((item, index) => (
             <li
               key={index}
-              onClick={() => router.push(item.path)}
+              onClick={() => item.path !== "#" && router.push(item.path)}
               className={`cursor-pointer text-center transition duration-150 ${
-                pathname === item.path ? "text-black" : "text-[#797979]"
+                pathname.startsWith(item.path) ? "text-black" : "text-[#797979]"
               }`}
             >
               {item.label}

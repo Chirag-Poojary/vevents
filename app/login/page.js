@@ -5,8 +5,13 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import RoleSelector from "@/src/components/RoleSelector";
 import { ToastContainer, toast } from "react-toastify";
+import axios from "axios";
+
 const Login = () => {
+  const [selectedRole, setSelectedRole] = useState("");
   const [showAbout, setShowAbout] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+const [loggedIn, setLoggedIn] = useState(false);
 
   const handleKnowMoreClick = () => {
     setShowAbout(!showAbout);
@@ -17,16 +22,15 @@ const Login = () => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-
-      // Use the user data to check in MongoDB instead (skip Firestore)
-
-      toast.success("Login Successful", {
-        position: "bottom-right",
-        autoClose: 3000,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "colored",
-      });
+      setUserEmail(user.email); // Save email for later
+    setLoggedIn(true);
+        toast.success("Google Auth Successful. Now select your user type", {
+          position: "bottom-right",
+          autoClose: 3000,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "colored",
+        });
     } catch (error) {
       console.error("Login Error:", error.code, error.message);
       toast.error(`Login Failed: ${error.message}`, {
@@ -38,6 +42,40 @@ const Login = () => {
       });
     }
   };
+
+  const handleRoleSubmit = async () => {
+  if (!userEmail || !selectedRole) {
+    toast.error("Login and role selection required");
+    return;
+  }
+
+  try {
+    const res = await axios.post("/api/verify-role", {
+      email: userEmail,
+      role: selectedRole,
+    });
+
+    if (res.data.success) {
+      toast.success("User role verified. Login complete!", {
+        position: "bottom-right",
+      });
+
+      // TODO: redirect or show dashboard
+    } else {
+      toast.error("Unauthorized role for this user");
+    }
+  } catch (err) {
+    console.error("Role verification failed:", err);
+    toast.error("Something went wrong verifying role", {
+        position: "bottom-right",
+        autoClose: 3000,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
+  }
+};
+
 
   return (
     <>
@@ -61,7 +99,7 @@ const Login = () => {
         >
           Log In
         </button>
-        <RoleSelector />
+        <RoleSelector onSelect={setSelectedRole} />
         <img src="/vit.png" width="1100" className="mt-10 opacity-15" />
         <div className="relative w-[80vw] h-[20vh]">
           <button

@@ -34,6 +34,7 @@ export default function CreateProposal() {
         ...formData,
         date: startDate,
         endDate: isMultiDay ? endDate : startDate,
+        approvalStage: "hod",
       };
 
       const docRef = await addDoc(collection(db, "proposals"), fullData);
@@ -56,7 +57,6 @@ export default function CreateProposal() {
         budget: "",
         description: "",
         status: "pending",
-        approvalStage: "hod",
       });
       setStartDate("");
       setEndDate("");

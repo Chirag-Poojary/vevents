@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import axios from "axios";
-  import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast } from "react-toastify";
 const roles = [
   { label: "Principal", value: "principal" },
   { label: "HOD", value: "hod" },
@@ -11,9 +11,10 @@ const roles = [
   { label: "Accounts", value: "accounts" },
 ];
 
-const RoleSelector = () => {
+const RoleSelector = ({ onSelect }) => {
   const router = useRouter();
   const [userEmail, setUserEmail] = useState("");
+  const [loadingUser, setLoadingUser] = useState(true);
   const [selectedRole, setSelectedRole] = useState("");
 
   useEffect(() => {
@@ -24,12 +25,18 @@ const RoleSelector = () => {
       } else {
         router.push("/login"); // redirect if not logged in
       }
+      setLoadingUser(false);
     });
     return () => unsubscribe();
   }, []);
 
   const handleSubmit = async () => {
-    if (!selectedRole) return;
+    if (!selectedRole || !userEmail) {
+      toast.error("Please log in and select a role first.", {
+        position: "bottom-right",
+      });
+      return;
+    }
 
     try {
       const res = await axios.post("/api/verify-role", {
@@ -79,7 +86,10 @@ const RoleSelector = () => {
         {roles.map((role) => (
           <button
             key={role.value}
-            onClick={() => setSelectedRole(role.value)}
+            onClick={() => {
+              setSelectedRole(role.value);
+              onSelect?.(role.value); // notify parent
+            }}
             className={`py-3 px-6 rounded-full text-white font-semibold transition duration-300
                 ${
                   selectedRole === role.value
