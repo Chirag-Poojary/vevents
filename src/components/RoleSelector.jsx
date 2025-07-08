@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
+
 const roles = [
   { label: "Principal", value: "principal" },
   { label: "HOD", value: "hod" },
@@ -23,7 +24,7 @@ const RoleSelector = ({ onSelect }) => {
       if (user) {
         setUserEmail(user.email);
       } else {
-        router.push("/login"); // redirect if not logged in
+        router.push("/login");
       }
       setLoadingUser(false);
     });
@@ -82,13 +83,32 @@ const RoleSelector = ({ onSelect }) => {
       />
       <h2 className="text-3xl font-bold text-[#1A1F71]">Select Your Role</h2>
 
-      <div className="grid grid-cols-2 gap-4">
+      {/* Mobile dropdown role selector */}
+      <div className="block sm:hidden">
+        <select
+          value={selectedRole}
+          onChange={(e) => {
+            setSelectedRole(e.target.value);
+            onSelect?.(e.target.value);
+          }}
+          className="w-full mt-4 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
+          <option value="" disabled>Select a role</option>
+          {roles.map((role) => (
+            <option key={role.value} value={role.value}>
+              {role.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="hidden sm:grid grid-cols-2 gap-4">
         {roles.map((role) => (
           <button
             key={role.value}
             onClick={() => {
               setSelectedRole(role.value);
-              onSelect?.(role.value); // notify parent
+              onSelect?.(role.value);
             }}
             className={`py-3 px-6 rounded-full text-white font-semibold transition duration-300
                 ${
@@ -115,3 +135,5 @@ const RoleSelector = ({ onSelect }) => {
 };
 
 export default RoleSelector;
+
+
