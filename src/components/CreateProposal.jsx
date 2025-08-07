@@ -2,7 +2,8 @@
 import React, { useState } from "react";
 import { db } from "@/src/firebase";
 import { collection, addDoc } from "firebase/firestore";
-  import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast } from "react-toastify";
+
 export default function CreateProposal() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -20,6 +21,9 @@ export default function CreateProposal() {
     status: "pending",
   });
 
+  // PDF file state
+  const [pdfFile, setPdfFile] = useState(null);
+
   // Handle text inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,38 +33,81 @@ export default function CreateProposal() {
   // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const fullData = {
-        ...formData,
-        date: startDate,
-        endDate: isMultiDay ? endDate : startDate,
-        approvalStage: "hod",
-      };
+      if (pdfFile) {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64PDF = reader.result;
 
-      const docRef = await addDoc(collection(db, "proposals"), fullData);
-      console.log("✅ Proposal submitted with ID:", docRef.id);
-      toast.success("Proposal submitted", {
-        position: "bottom-right",
-        autoClose: 3000,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "colored",
-      });
+          const fullData = {
+            pdfBase64: base64PDF,
+            date: startDate,
+            endDate: isMultiDay ? endDate : startDate,
+            approvalStage: "hod",
+            status: "pending",
+            uploadedAs: "pdf",
+          };
 
-      // Optional: Clear form
-      setFormData({
-        eventName: "",
-        committeeHead: "",
-        time: "",
-        department: "",
-        venue: "",
-        budget: "",
-        description: "",
-        status: "pending",
-      });
-      setStartDate("");
-      setEndDate("");
-      setIsMultiDay(false);
+          const docRef = await addDoc(collection(db, "proposals"), fullData);
+          console.log("✅ Proposal PDF submitted with ID:", docRef.id);
+          toast.success("PDF Proposal submitted", {
+            position: "bottom-right",
+            autoClose: 3000,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "colored",
+          });
+
+          setFormData({
+            eventName: "",
+            committeeHead: "",
+            time: "",
+            department: "",
+            venue: "",
+            budget: "",
+            description: "",
+            status: "pending",
+          });
+          setStartDate("");
+          setEndDate("");
+          setIsMultiDay(false);
+          setPdfFile(null);
+        };
+        reader.readAsDataURL(pdfFile);
+      } else {
+        const fullData = {
+          ...formData,
+          date: startDate,
+          endDate: isMultiDay ? endDate : startDate,
+          approvalStage: "hod",
+        };
+
+        const docRef = await addDoc(collection(db, "proposals"), fullData);
+        console.log("✅ Proposal submitted with ID:", docRef.id);
+        toast.success("Proposal submitted", {
+          position: "bottom-right",
+          autoClose: 3000,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "colored",
+        });
+
+        // Optional: Clear form
+        setFormData({
+          eventName: "",
+          committeeHead: "",
+          time: "",
+          department: "",
+          venue: "",
+          budget: "",
+          description: "",
+          status: "pending",
+        });
+        setStartDate("");
+        setEndDate("");
+        setIsMultiDay(false);
+      }
     } catch (error) {
       console.error("❌ Error submitting proposal:", error);
       toast.error("Error submitting proposal", {
@@ -204,6 +251,30 @@ export default function CreateProposal() {
           rows="4"
           className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm resize-y"
         />
+
+        {/* OR Upload PDF Option */}
+        <div>
+          <div>
+            <label className="block text-sm font-medium text-[#1A1F71] mb-1 pl-[300px]">
+              OR 
+            </label>
+            <a
+              href="/eventproposalform.docx"
+              download
+              className="flex items-center gap-3 w-full px-4 py-3 border border-[#E0E0E0] rounded-lg bg-white hover:bg-[#f3f3f3] transition cursor-pointer"
+              style={{ textDecoration: "none" }}
+            >
+              <img
+                src="/word.png"
+                alt="Word Icon"
+                className="w-6 h-6"
+              />
+              <span className="text-sm text-[#1A1F71] font-medium">
+                Event Proposal Template.docx
+              </span>
+            </a>
+          </div>
+        </div>
 
         <button
           type="submit"

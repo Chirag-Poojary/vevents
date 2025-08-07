@@ -4,9 +4,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react"; // optional: install l
 import YouTubePlayer from "@/src/components/YouTubePlayer";
 
 const images = [
-  "/eventimgs/img1.jpg",
-  "/eventimgs/img2.jpg",
-  "/eventimgs/img3.jpg",
+  "events4.jpg",
+  "events5.jpg",
+  "events6.jpeg",
 ];
 
 const ImageSlider = () => {
@@ -46,7 +46,7 @@ const ImageSlider = () => {
                 key={i}
                 src={src}
                 alt={`Slide ${i}`}
-                className="w-full flex-shrink-0 object-cover h-full"
+                className="w-full flex-shrink-0 object-cover h-full bg-cover"
               />
             ))}
           </div>
