@@ -52,7 +52,9 @@ const ProposalStatus = () => {
 
     if (role === "committee") {
       filtered = allData.filter(
-        (p) => p.status === "accepted" && p.approvalStage === "done"
+        (p) =>
+          p.approvalStage === "done" &&
+          (p.status === "accepted" || p.status === "declined")
       );
     } else if (role === "hod") {
       filtered = allData.filter(
