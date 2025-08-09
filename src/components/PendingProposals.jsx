@@ -84,7 +84,7 @@ const PendingProposals = () => {
           <>
             <div className="flex items-center">
               <button
-                className="bg-[#2E7D32] text-white font-bold text-lg px-5 py-3 rounded-full mb-5"
+                className="bg-[#2E7D32] text-white font-bold text-lg px-5 py-3 rounded-full"
                 onClick={() => setShowForm(true)}
               >
                 Create Proposal
@@ -96,10 +96,10 @@ const PendingProposals = () => {
                 className="flex items-center gap-3 px-5 py-3 rounded-full transition cursor-pointer"
                 style={{ textDecoration: "none" }}
               >
-                <div className="text-sm text-[#1A1F71] font-medium">
-                  <img src="/word.png" alt="Word Icon" className="w-6 h-6" />
+                <button className="text-[#1A1F71] font-bold text-lg flex gap-3 px-5 py-3 bg-blue-400 rounded-full">
+                  <img src="/download.svg" alt="Word Icon" className="" />
                   Download Template
-                </div>
+                </button>
               </a>
             </div>
 
