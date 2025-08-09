@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { db } from "@/src/firebase";
 import { collection, addDoc } from "firebase/firestore";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer, toast } from 'react-toastify';
 
 export default function CreateProposal() {
   const [startDate, setStartDate] = useState("");
@@ -250,26 +250,15 @@ export default function CreateProposal() {
 
         {/* OR Upload PDF Option */}
         <div>
-          <div>
-            <label className="block text-sm font-medium text-[#1A1F71] mb-1 pl-[300px]">
-              OR 
-            </label>
-            <a
-              href="/eventproposalform.docx"
-              download
-              className="flex items-center gap-3 w-full px-4 py-3 border border-[#E0E0E0] rounded-lg bg-white hover:bg-[#f3f3f3] transition cursor-pointer"
-              style={{ textDecoration: "none" }}
-            >
-              <img
-                src="/word.png"
-                alt="Word Icon"
-                className="w-6 h-6"
-              />
-              <span className="text-sm text-[#1A1F71] font-medium">
-                Event Proposal Template.docx
-              </span>
-            </a>
-          </div>
+          <label className="block text-sm font-medium text-[#1A1F71] mb-1 pl-[240px]">
+            OR (Upload word file)
+          </label>
+          <input
+            type="file"
+            accept="application/pdf"
+            onChange={(e) => setPdfFile(e.target.files[0])}
+            className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
+          />
         </div>
 
         <button
@@ -282,3 +271,4 @@ export default function CreateProposal() {
     </div>
   );
 }
+
