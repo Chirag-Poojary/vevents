@@ -82,12 +82,26 @@ const PendingProposals = () => {
         {/* Only show to committee users */}
         {userRole === "committee" && (
           <>
-            <button
-              className="bg-[#2E7D32] text-white font-bold text-lg px-5 py-3 rounded-full mb-5"
-              onClick={() => setShowForm(true)}
-            >
-              Create Proposal
-            </button>
+            <div className="flex items-center">
+              <button
+                className="bg-[#2E7D32] text-white font-bold text-lg px-5 py-3 rounded-full mb-5"
+                onClick={() => setShowForm(true)}
+              >
+                Create Proposal
+              </button>
+
+              <a
+                href="/eventproposalform.docx"
+                download
+                className="flex items-center gap-3 px-5 py-3 rounded-full transition cursor-pointer"
+                style={{ textDecoration: "none" }}
+              >
+                <div className="text-sm text-[#1A1F71] font-medium">
+                  <img src="/word.png" alt="Word Icon" className="w-6 h-6" />
+                  Download Template
+                </div>
+              </a>
+            </div>
 
             {showForm && (
               <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-center items-center">
@@ -110,25 +124,27 @@ const PendingProposals = () => {
         </h2>
         {!proposals.length ? (
           <div className="flex w-full h-[60vh] justify-center items-center flex-col">
-            <img src="/background.svg" className="w-[25vw] mt-20 opacity-60"></img>
+            <img
+              src="/background.svg"
+              className="w-[25vw] mt-20 opacity-60"
+            ></img>
             <p className="text-center text-gray-400 text-2xl mt-5 ">
               No proposals to show
             </p>
           </div>
         ) : (
-
-        <div className="grid gap-4">
-          {proposals.map((proposal) => (
-            <ProposalCard
-              key={proposal.id}
-              proposal={proposal}
-              onClick={() => {
-                setSelectedProposal(proposal);
-                setShowDetails(true);
-              }}
-            />
-          ))}
-        </div>
+          <div className="grid gap-4">
+            {proposals.map((proposal) => (
+              <ProposalCard
+                key={proposal.id}
+                proposal={proposal}
+                onClick={() => {
+                  setSelectedProposal(proposal);
+                  setShowDetails(true);
+                }}
+              />
+            ))}
+          </div>
         )}
 
         {showDetails && selectedProposal && (

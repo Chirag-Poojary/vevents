@@ -145,7 +145,6 @@ export default function CreateProposal() {
           onChange={handleChange}
           placeholder="Event Name"
           className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
-          required
         />
         <input
           type="text"
@@ -154,7 +153,6 @@ export default function CreateProposal() {
           onChange={handleChange}
           placeholder="Committee Head Name"
           className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
-          required
         />
 
         <div>
@@ -166,7 +164,7 @@ export default function CreateProposal() {
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
-            required
+
           />
         </div>
 
@@ -190,7 +188,7 @@ export default function CreateProposal() {
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
-              required
+  
             />
           </div>
         )}
@@ -202,7 +200,6 @@ export default function CreateProposal() {
           onChange={handleChange}
           placeholder="Timing (e.g. 10:00 AM - 4:00 PM)"
           className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
-          required
         />
 
         <div>
@@ -214,7 +211,7 @@ export default function CreateProposal() {
             value={formData.department}
             onChange={handleChange}
             className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
-            required
+
           >
             <option value="">Select Department</option>
             <option value="INFT">INFT</option>
@@ -233,7 +230,6 @@ export default function CreateProposal() {
           onChange={handleChange}
           placeholder="Venue"
           className="w-full px-4 py-2 rounded-lg border border-[#E0E0E0] bg-white text-sm"
-          required
         />
         <input
           type="number"
